@@ -35,14 +35,7 @@ LD_PRELOAD=
 C_INCLUDE_PATH=
 CPPFLAGS=
 LIBRARY_PATH=
-PATH_SEPARATOR=':'
-PATH=/usr/bin:$PATH
-/usr/bin/cc
--I%(builddir)s
--I%(srcdir)s
--I%(builddir)s/libguile
--I.
--I%(srcdir)s/libguile"
+/usr/bin/cc"
 '''))
     # FIXME: guile runs gen_scmconfig [when not x-building also guile]
     # without setting the proper LD_LIBRARY_PATH.
@@ -170,7 +163,7 @@ libltdl_cv_sys_search_path=${libltdl_cv_sys_search_path="%(system_prefix)s/lib"}
         self.system ('''cd %(install_prefix)s/bin && cp guile.exe guile-windows.exe''')
 
 class Guile__linux (Guile):
-    compile_command = ('export LD_LIBRARY_PATH=%(builddir)s/libguile/.libs:$LD_LIBRARY_PATH;'
+    compile_command = ('export LD_LIBRARY_PATH=%(builddir)s/libguile/.libs:%(system_prefix)s/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH};'
                 + Guile.compile_command)
 
 class Guile__linux__ppc (Guile__linux):
