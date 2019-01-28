@@ -18,6 +18,7 @@ class LilyPond_test (lilypond.LilyPond_base):
                 'tools::fonts-luximono',
                 'tools::fonts-ipafont',
                 'tools::fonts-gnufreefont',
+                'tools::rsync',
                 ])
     @context.subst_method
     def test_ball (self):
