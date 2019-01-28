@@ -88,3 +88,11 @@ class Db__tools (tools.AutoBuild, Db):
         # FIXME: /usr/docs/ is full of invalid symlinks
         self.system ('rm -rf %(install_prefix)s/docs')
         self.system ('cd %(install_prefix)s/lib && ln -s libdb-*.la libdb.la')
+        self.system ('mkdir -p %(install_prefix)s/lib64')
+        self.system ('cd %(install_prefix)s/lib64 && ln -s ../lib/libdb.la libdb.la')
+        self.system ('cd %(install_prefix)s/lib64 && ln -s ../lib/libdb.so libdb.so')
+        self.system ('cd %(install_prefix)s/lib64 && ln -s ../lib/libdb-4.7.so libdb-4.7.so')
+        self.system ('cd %(install_prefix)s/lib64 && ln -s ../lib/libdb-4.so libdb-4.so')
+        self.system ('cd %(install_prefix)s/lib64 && ln -s ../lib/libdb.a libdb.a')
+        self.system ('cd %(install_prefix)s/lib64 && ln -s ../lib/libdb-4.7.la libdb-4.7.la')
+        self.system ('cd %(install_prefix)s/lib64 && ln -s ../lib/libdb-4.7.a libdb-4.7.a')

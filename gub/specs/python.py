@@ -191,6 +191,23 @@ class Python__tools (tools.AutoBuild, Python):
         ]
     force_autoupdate = True
     parallel_build_broken = True
-    make_flags = Python.make_flags + ' LIBC="-lcrypt -ldb"'
+    # Use gcc-7 if it is available. Python 2.4.5 seems to incompatible to gcc-8!
+    # LD_LIBRARY_PATH and python wrapper script are needed for ubuntu 18.04
+    configure_command = ('if [ "A`which gcc-7 2>>/dev/null`" != "A" ]; then export CC=gcc-7 ; fi; '
+                         +'LD_LIBRARY_PATH=%(system_prefix)s/lib '
+                         + tools.AutoBuild.configure_command)
+    compile_command = ('LD_LIBRARY_PATH=%(system_prefix)s/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} '
+                         + tools.AutoBuild.compile_command)
+    install_command = ('LD_LIBRARY_PATH=%(system_prefix)s/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} '
+                         + tools.AutoBuild.install_command)
+    make_flags = Python.make_flags + ' LIBC="-lcrypt -ldb" '
     def patch (self):
         Python.patch (self)
+    def install (self):
+        Python.install (self)
+        self.system ('''
+mv %(install_prefix)s/bin/python %(install_prefix)s/bin/_python
+echo '#!/bin/sh' > %(install_prefix)s/bin/python
+echo 'LD_LIBRARY_PATH=%(system_prefix)s/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} %(system_prefix)s/bin/_python "$@"' >> %(install_prefix)s/bin/python
+chmod 755 %(install_prefix)s/bin/python
+''')
