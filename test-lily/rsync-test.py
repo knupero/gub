@@ -1,8 +1,17 @@
 #! /usr/bin/env python
 
+import os
+import re
+import sys
+import string
+import glob
+import optparse
+
+currdir = os.getcwd ()
+bindir = os.path.dirname (sys.argv[0])
+
 def argv0_relocation ():
     import os, sys
-    bindir = os.path.dirname (sys.argv[0])
     prefix = os.path.dirname (bindir)
     if not prefix:
         prefix = bindir + '/..'
@@ -10,12 +19,6 @@ def argv0_relocation ():
 
 argv0_relocation ()
 
-import os
-import re
-import sys
-import string
-import glob
-import optparse
 #
 from gub.syntax import printf
 from gub import versiondb
@@ -30,7 +33,7 @@ def parse_options ():
                   default='')
     p.add_option ('--version-db',
                   dest='version_db',
-                  help='which version db to use',
+                  help='which version db to use [%default]',
                   default='versiondb/lilypond.versions')
     p.add_option ('--output-distance',
                   dest='output_distance_script',
@@ -44,23 +47,30 @@ def parse_options ():
                   action='store',
                   dest='version_file',
                   help='where to get the version number')
+    p.add_option ('--gub-target-dir',
+                  dest='gub_target_dir',
+                  default='',
+                  help='which path prefix replacement to use'
+                       ' while unpacking current test-output tarballs')
     p.add_option ('--test-dir',
                   dest='test_dir',
                   default='uploads/webtest/',
-                  help='Where to put local versions of the test output')
+                  help='where to put local versions of the test output'
+                       ' [%default]')
     p.add_option ('--upload-dir',
                   dest='upload_dir',
                   default='uploads/',
-                  help='Where to find current test-output tarballs')
+                  help='where to find current test-output tarballs'
+                       ' [%default]')
     p.add_option ('--regtest-dir',
                   dest='regtest_dir',
                   default='regtests/',
-                  help='Where to find old test-output tarballs')
+                  help='where to find old test-output tarballs [%default]')
     p.add_option ('--keep',
                   dest='keep',
                   action='store_true',
                   default=False,
-                  help='Do not remove unpack dir')
+                  help='do not remove unpack dir')
  
     (options, args) = p.parse_args ()
 
@@ -74,7 +84,8 @@ def system (cmd):
     printf (cmd)
     stat = os.system (cmd)
     if stat:
-            raise Exception ('fail')
+        raise Exception ('fail')
+
 def read_version (source):
     s = open (source).read ()
     s = s.strip ()
@@ -108,10 +119,16 @@ def compare_test_tarballs (options, version_file_tuples):
             system ('rm -rf %s' % dir_str)
         os.makedirs (dir_str)
         system ('tar --strip-component=3 -C %s -xjf %s' % (dir_str, file))
+        if options.gub_target_dir:
+            system ('cd %s '
+                    '&& sh %s/adjust-paths.sh %s' % (dir_str,
+                                                     currdir + '/' + bindir,
+                                                     options.gub_target_dir))
 
     html = ''
     for d in dirs[:-1]:
-        cmd = ('cd %s && python %s --create-images --output-dir %s/compare-%s --local-datadir %s %s '
+        cmd = ('cd %s '
+               '&& python %s --create-images --output-dir %s/compare-%s --local-datadir %s %s'
                % (unpack_dir,
                   options.output_distance_script,
                   dest_dir, d, d, dirs[-1]))

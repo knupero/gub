@@ -30,6 +30,13 @@ MISSING_OPTIONAL=dblatex
     install_command = 'true'
     def install (self):
         target.AutoBuild.install (self) 
+        # Store the `$targetdir' value in file `AAA-prefix'.  This is needed
+        # in case the tarball gets extracted by another gub incarnation that
+        # uses a different platform, architecture, user, or top-level
+        # directory.
+        self.system('''
+echo %(targetdir)s > %(builddir)s/input/regression/out-test/AAA-prefix
+''')
         self.system ('''
 LD_PRELOAD= tar -C %(builddir)s -cjf %(test_ball)s input/regression/out-test
 ''')

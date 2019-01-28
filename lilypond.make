@@ -291,7 +291,8 @@ unlocked-test-export:
 		$(PYTHON) test-lily/rsync-test.py \
 		--version-file=$(NATIVE_LILY_BUILD)/out/VERSION \
 		--output-distance=$(NATIVE_LILY_SRC)/$(BUILDSCRIPTS)/output-distance.py \
-		--test-dir=uploads/webtest
+		--test-dir=uploads/webtest \
+		--gub-target-dir=$(NATIVE_TARGET_DIR)
 
 doc-export:
 	$(info **** doc-export rule)
