@@ -1,4 +1,5 @@
 #
+import os
 from gub import context
 from gub import misc
 from gub import target
@@ -52,6 +53,14 @@ LD_PRELOAD= tar -C %(builddir)s -cjf %(test_ball)s input/regression/out-test
         self.file_sub ([('^EXTRACTPDFMARK = ([^L].*)$',
                          'EXTRACTPDFMARK = LD_LIBRARY_PATH=%(tools_prefix)s/lib \\1')],
                        '%(builddir)s/config.make')
+        # our texi2pdf uses system's etex, so create a script etex
+        # that calls /usr/bin/etex with empty LD_LIBRARY_PATH
+        foutname = './target/tools/root/usr/bin/etex'
+        fout = open (foutname, 'w+')
+        fout.write ('#!/bin/sh\n')
+        fout.write ('LD_LIBRARY_PATH= /usr/bin/etex $@\n')
+        fout.close
+        os.chmod(foutname,0700)
         # The timestamp of these scripts should not be older than config.make.
         # Otherwise, they will be regenerated from the source directory
         # and the above substitutes will be lost.
